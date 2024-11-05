@@ -81,10 +81,9 @@
     <div id="wordSelectionSection" style="display: none;">
         <h2>Select the Words You Remembered</h2>
         <p>Select the 20 words you remember from the previous list.</p>
-        <div id="selectionForm" class="selection-grid">
-            <!-- Dynamically populated list of 100 words for selection -->
-        </div>
-        <button type="button" class="button" onclick="checkAnswers(event)">Submit Answers</button>
+        <div id="selectionForm" class="selection-grid"></div>
+        <!-- Bind checkAnswers and writeTestData to the submit button -->
+        <button type="button" class="button" onclick="checkAnswers(); window.writeTestData();">Submit Answers</button>
     </div>
 
     <div id="resultsSection" style="display: none;">
@@ -111,6 +110,7 @@
     ];
     
     let userColor = 'black';
+    let colorCount = 0;
     
     function startExperiment() {
         userColor = document.getElementById('color').value;
@@ -123,7 +123,6 @@
         const wordListContainer = document.getElementById('wordListContainer');
         wordListContainer.innerHTML = '';
         
-        // Display 20 words in a 4x5 grid with the selected color
         originalWords.forEach(word => {
             const wordElement = document.createElement('div');
             wordElement.innerText = word;
@@ -133,7 +132,6 @@
         
         document.getElementById('wordDisplaySection').style.display = 'block';
         
-        // Countdown for 5 seconds
         let countdown = 5;
         const timerElement = document.getElementById('timer');
         const countdownInterval = setInterval(() => {
@@ -150,13 +148,11 @@
         document.getElementById('wordDisplaySection').style.display = 'none';
         document.getElementById('wordSelectionSection').style.display = 'block';
         
-        // Combine and shuffle the 20 original words and 80 additional words to form 100 words
         const allWords = [...originalWords, ...additionalWords];
-        shuffleArray(allWords); // Shuffle to randomize the order once
+        shuffleArray(allWords);
 
-        // Display all words in a 4x25 fixed grid
         const selectionForm = document.getElementById('selectionForm');
-        selectionForm.innerHTML = '';  // Clear form
+        selectionForm.innerHTML = '';
         allWords.forEach(word => {
             const label = document.createElement('label');
             label.style.display = 'flex';
@@ -170,7 +166,7 @@
         });
     }
 
-    function checkAnswers(event) {
+    function checkAnswers() {
         const selectedWords = Array.from(document.querySelectorAll('#selectionForm input:checked')).map(input => input.value);
         let correctCount = 0;
         selectedWords.forEach(word => {
@@ -178,6 +174,7 @@
                 correctCount++;
             }
         });
+        colorCount = correctCount;
         
         document.getElementById('wordSelectionSection').style.display = 'none';
         document.getElementById('resultsSection').style.display = 'block';
@@ -191,6 +188,40 @@
             [array[i], array[j]] = [array[j], array[i]];
         }
     }
+</script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDmwLBNHnqYuq45EmzoQy_KDRfOPo7r2Dc",
+        authDomain: "color-memory-3ca90.firebaseapp.com",
+        databaseURL: "https://color-memory-3ca90-default-rtdb.firebaseio.com",
+        projectId: "color-memory-3ca90",
+        storageBucket: "color-memory-3ca90.firebasestorage.app",
+        messagingSenderId: "57325400208",
+        appId: "1:57325400208:web:3c0562bf517f1038ca6815"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Define writeTestData function in the module and attach it to the window object
+    window.writeTestData = function() {
+        const dbRef = ref(database, 'testData');
+        push(dbRef, {
+            timestamp: new Date().toISOString(),
+            color: userColor,
+            memocnt: colorCount
+        })
+        .then(() => {
+            console.log("Data written successfully");
+        })
+        .catch((error) => {
+            console.error("Error writing data:", error);
+        });
+    };
 </script>
 
 </body>
