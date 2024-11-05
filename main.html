@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Recall Experiment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
+        .timer {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="colorSelectionSection">
+        <h1>Word Recall Experiment</h1>
+        <p>Choose your preferred color for the experiment:</p>
+        <select id="color" required>
+            <option value="black">Black</option>
+            <option value="blue">Blue</option>
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+            <option value="purple">Purple</option>
+            <option value="orange">Orange</option>
+            <option value="pink">Pink</option>
+        </select>
+        <button class="button" onclick="startExperiment()">Start Experiment</button>
+    </div>
+
+    <div id="wordDisplaySection" style="display: none;">
+        <h2>Memorize these words</h2>
+        <div class="word-grid" id="wordListContainer"></div>
+        <div class="timer" id="timer">5</div>
+    </div>
+
+    <div id="wordSelectionSection" style="display: none;">
+        <h2>Select the Words You Remembered</h2>
+        <p>Select the 20 words you remember from the previous list.</p>
+        <div id="selectionForm" class="selection-grid">
+            <!-- Dynamically populated list of 100 words for selection -->
+        </div>
+        <button type="button" class="button" onclick="checkAnswers(event)">Submit Answers</button>
+    </div>
+
+    <div id="resultsSection" style="display: none;">
+        <h2>Results</h2>
+        <p id="resultsText"></p>
+    </div>
+</div>
+
+<script>
+    const originalWords = [
+        "apple", "brave", "candy", "drama", "eagle", "flame", "giant", "honor", "joker", "knock",
+        "lemon", "magic", "noble", "ocean", "power", "queen", "river", "stone", "tiger", "unity"
+    ];
+
+    const additionalWords = [
+        "angle", "beach", "chair", "dream", "glove", "heart", "lemon", "mouse", "piano", "quick",
+        "table", "vivid", "zebra", "flock", "grape", "horse", "jelly", "knife", "liver", "march",
+        "night", "organ", "proud", "queen", "roast", "shade", "teeth", "uncle", "valve", "wheat",
+        "xenon", "yacht", "zonal", "bison", "clamp", "drift", "exile", "flint", "gleam", "hatch",
+        "ivory", "jolly", "kneel", "laser", "melon", "nerve", "ocean", "plumb", "quote", "raven",
+        "sheep", "toxic", "ultra", "vapor", "whale", "xerox", "youth", "zesty", "bloom", "crisp",
+        "dough", "evoke", "feast", "glint", "honey", "islet", "judge", "kiosk", "lunar", "merit",
+        "noble", "olive", "pinky", "quest", "rebel", "silly", "torch", "ulcer", "vault", "widow"
+    ];
+    
+    let userColor = 'black';
+    
+    function startExperiment() {
+        userColor = document.getElementById('color').value;
+        
+        document.getElementById('colorSelectionSection').style.display = 'none';
+        displayWordList();
+    }
+
+    function displayWordList() {
+        const wordListContainer = document.getElementById('wordListContainer');
+        wordListContainer.innerHTML = '';
+        
+        // Display 20 words in a 4x5 grid with the selected color
+        originalWords.forEach(word => {
+            const wordElement = document.createElement('div');
+            wordElement.innerText = word;
+            wordElement.style.color = userColor;
+            wordListContainer.appendChild(wordElement);
+        });
+        
+        document.getElementById('wordDisplaySection').style.display = 'block';
+        
+        // Countdown for 5 seconds
+        let countdown = 5;
+        const timerElement = document.getElementById('timer');
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            timerElement.innerText = countdown;
+            if (countdown === 0) {
+                clearInterval(countdownInterval);
+                setTimeout(() => proceedToSelection(), 1000);
+            }
+        }, 1000);
+    }
+
+    function proceedToSelection() {
+        document.getElementById('wordDisplaySection').style.display = 'none';
+        document.getElementById('wordSelectionSection').style.display = 'block';
+        
+        // Combine and shuffle the 20 original words and 80 additional words to form 100 words
+        const allWords = [...originalWords, ...additionalWords];
+        shuffleArray(allWords); // Shuffle to randomize the order once
+
+        // Display all words in a 4x25 fixed grid
+        const selectionForm = document.getElementById('selectionForm');
+        selectionForm.innerHTML = '';  // Clear form
+        allWords.forEach(word => {
+            const label = document.createElement('label');
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = word;
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(word));
+            selectionForm.appendChild(label);
+        });
+    }
+
+    function checkAnswers(event) {
+        const selectedWords = Array.from(document.querySelectorAll('#selectionForm input:checked')).map(input => input.value);
+        let correctCount = 0;
+        selectedWords.forEach(word => {
+            if (originalWords.includes(word)) {
+                correctCount++;
+            }
+        });
+        
+        document.getElementById('wordSelectionSection').style.display = 'none';
+        document.getElementById('resultsSection').style.display = 'block';
+        
+        document.getElementById('resultsText').innerText = `You correctly recalled ${correctCount} out of 20 words.`;
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+</script>
+
+</body>
+</html>
