@@ -59,8 +59,8 @@
 <div class="container">
     <div id="colorSelectionSection">
         <h1>Word Recall Experiment</h1>
-        <form id="demographicsForm">
-            <label>Age: <input type="number" id="age" required></label><br><br>
+        <form id="demographicsForm" onsubmit="submitForm(event)">
+            <label>Age: <input type="number" name="age" min="18" max="100" id="age" required></label><br><br>
             <label>Gender: 
                 <select id="gender" required>
                     <option value="" disabled selected>Select your gender</option>
@@ -78,19 +78,21 @@
                     <option value="Yes">Yes</option>
                 </select>
             </label><br><br>
+
+            <h2>Purpose of Experiment</h2>
+            <p>Thank you for participating in this experiment. This study investigates how color preference affects word recall. Choose your preferred color for the experiment:</p>
+                <select id="color" required>
+                    <option value="" disabled selected>Select a color</option>
+                    <option value="black">Black</option>
+                    <option value="blue">Blue</option>
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="purple">Purple</option>
+                    <option value="orange">Orange</option>
+                    <option value="pink">Pink</option>
+                </select>
+                <button type="submit" class="button">Start Experiment</button>
         </form>
-        <h2>Purpose of Experiment</h2>
-    <p>Thank you for participating in this experiment. This study investigates how color preference affects word recall. Choose your preferred color for the experiment:</p>
-        <select id="color" required>
-            <option value="black">Black</option>
-            <option value="blue">Blue</option>
-            <option value="red">Red</option>
-            <option value="green">Green</option>
-            <option value="purple">Purple</option>
-            <option value="orange">Orange</option>
-            <option value="pink">Pink</option>
-        </select>
-        <button class="button" onclick="startExperiment()">Start Experiment</button>
     </div>
 
     <div id="wordDisplaySection" style="display: none;">
@@ -132,7 +134,7 @@
     
     let userColor = 'black';
     let colorCount = 0;
-    
+
     let userData = {};
     function startExperiment() {
         // userColor = document.getElementById('color').value;
@@ -145,6 +147,12 @@
         
         document.getElementById('colorSelectionSection').style.display = 'none';
         displayWordList();
+    }
+
+    
+    function submitForm(event) {
+        event.preventDefault();
+        startExperiment();
     }
 
     function displayWordList() {
