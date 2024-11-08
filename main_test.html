@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Recall Experiment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
+        .timer {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="colorSelectionSection">
+        <h1>Word Recall Experiment</h1>
+        <form id="demographicsForm" onsubmit="submitForm(event)">
+            <label>Age: <input type="number" name="age" min="18" max="100" id="age" required></label><br><br>
+            <label>Gender: 
+                <select id="gender" required>
+                    <option value="" disabled selected>Select your gender</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+            </label><br><br>    
+            <label>Is English your first language?
+                <select id="firstLanguage" required>
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </label><br><br>
+            <label>Have you been diagnosed with color blindness? 
+                <select id="colorBlind" required>
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </label><br><br>
+
+            <h2>Purpose of Experiment</h2>
+            <p>Thank you for participating in this experiment. This study investigates how color preference affects word recall. Choose your preferred color for the experiment:</p>
+                <select id="color" required>
+                    <option value="" disabled selected>Select a color</option>
+                    <option value="black">Black</option>
+                    <option value="blue">Blue</option>
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="purple">Purple</option>
+                    <option value="orange">Orange</option>
+                    <option value="pink">Pink</option>
+                </select>
+                <button type="submit" class="button">Start Experiment</button>
+        </form>
+    </div>
+
+    <div id="wordDisplaySection" style="display: none;">
+        <h2>Memorize these words in 1 minute</h2>
+        <div class="word-grid" id="wordListContainer"></div>
+        <div class="timer" id="timer">5</div>
+    </div>
+
+    <div id="wordSelectionSection" style="display: none;">
+        <h2>Select the Words You Remembered</h2>
+        <p>Select the 20 words you remember from the previous list.</p>
+        <div id="selectionForm" class="selection-grid"></div>
+        <!-- Bind checkAnswers and writeTestData to the submit button -->
+        <button type="button" class="button" onclick="checkAnswers(); window.writeTestData();">Submit Answers</button>
+    </div>
+
+    <div id="resultsSection" style="display: none;">
+        <h2>Results</h2>
+        <p id="resultsText"></p>
+    </div>
+</div>
+
+<script>
+    const originalWords = [
+        "apple", "brave", "candy", "drama", "eagle", "flame", "giant", "honor", "joker", "knock",
+        "lemon", "magic", "noble", "ocean", "power", "queen", "river", "stone", "tiger", "unity"
+    ];
+
+    const additionalWords = [
+        "angle", "beach", "chair", "dream", "glove", "heart", "never", "mouse", "piano", "quick",
+        "table", "vivid", "zebra", "flock", "grape", "horse", "jelly", "knife", "liver", "march",
+        "night", "organ", "proud", "virus", "roast", "shade", "teeth", "uncle", "valve", "wheat",
+        "xenon", "yacht", "zonal", "bison", "clamp", "drift", "exile", "flint", "gleam", "hatch",
+        "ivory", "jolly", "kneel", "laser", "melon", "nerve", "order", "plumb", "quote", "raven",
+        "sheep", "toxic", "ultra", "vapor", "whale", "xerox", "youth", "zesty", "bloom", "crisp",
+        "dough", "evoke", "feast", "glint", "honey", "islet", "judge", "kiosk", "lunar", "merit",
+        "irony", "olive", "pinky", "quest", "rebel", "silly", "torch", "ulcer", "vault", "widow"
+    ];
+    
+    let userColor = 'black';
+    let colorCount = 0;
+
+    let userData = {};
+    function startExperiment() {
+        // Capture demographic information
+        userData.age = document.getElementById('age').value;
+        userData.gender = document.getElementById('gender').value;
+        userData.colorBlind = document.getElementById('colorBlind').value;
+        userData.userColor = document.getElementById('color').value;
+        
+        document.getElementById('colorSelectionSection').style.display = 'none';
+        displayWordList();
+    }
+
+    
+    function submitForm(event) {
+        event.preventDefault();
+        startExperiment();
+    }
+
+    function displayWordList() {
+        const wordListContainer = document.getElementById('wordListContainer');
+        wordListContainer.innerHTML = '';
+        
+        originalWords.forEach(word => {
+            const wordElement = document.createElement('div');
+            wordElement.innerText = word;
+            wordElement.style.color = userData.userColor;
+            wordListContainer.appendChild(wordElement);
+        });
+        
+        document.getElementById('wordDisplaySection').style.display = 'block';
+        
+        let countdown = 5;
+        const timerElement = document.getElementById('timer');
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            timerElement.innerText = countdown;
+            if (countdown === 0) {
+                clearInterval(countdownInterval);
+                setTimeout(() => proceedToSelection(), 1000);
+            }
+        }, 1000);
+    }
+
+    function proceedToSelection() {
+        document.getElementById('wordDisplaySection').style.display = 'none';
+        document.getElementById('wordSelectionSection').style.display = 'block';
+        
+        const allWords = [...originalWords, ...additionalWords];
+        shuffleArray(allWords);
+
+        const selectionForm = document.getElementById('selectionForm');
+        selectionForm.innerHTML = '';
+        allWords.forEach(word => {
+            const label = document.createElement('label');
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = word;
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(word));
+            selectionForm.appendChild(label);
+        });
+    }
+    function checkAnswers() {
+        const selectedWords = Array.from(document.querySelectorAll('#selectionForm input:checked')).map(input => input.value);
+        let correctCount = 0;
+        let incorrectCount = 0;
+        
+        selectedWords.forEach(word => {
+            if (originalWords.includes(word)) {
+                correctCount++;
+            } else {
+                incorrectCount++;
+            }
+        });
+    
+        userData.correctCount = correctCount;
+        userData.incorrectCount = incorrectCount;
+        
+        document.getElementById('wordSelectionSection').style.display = 'none';
+        document.getElementById('resultsSection').style.display = 'block';
+        
+        document.getElementById('resultsText').innerText = `You correctly recalled ${correctCount} out of 20 words and selected ${incorrectCount} incorrect words.`;
+    }
+    
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+</script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDmwLBNHnqYuq45EmzoQy_KDRfOPo7r2Dc",
+        authDomain: "color-memory-3ca90.firebaseapp.com",
+        databaseURL: "https://color-memory-3ca90-default-rtdb.firebaseio.com",
+        projectId: "color-memory-3ca90",
+        storageBucket: "color-memory-3ca90.firebasestorage.app",
+        messagingSenderId: "57325400208",
+        appId: "1:57325400208:web:3c0562bf517f1038ca6815"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Define writeTestData function in the module and attach it to the window object
+
+    window.writeTestData = function() {
+        const dbRef = ref(database, 'testData');
+        push(dbRef, {
+            timestamp: new Date().toISOString(),
+            userData: userData
+        })
+        .then(() => {
+            console.log("Data written successfully");
+        })
+        .catch((error) => {
+            console.error("Error writing data:", error);
+        });
+    };
+</script>
+
+</body>
+</html>
