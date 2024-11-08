@@ -5,25 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Recall Experiment</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        body, html {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        
+        .wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
+            min-height: 100vh;
+            padding: 20px; /* Allows spacing on smaller screens */
+            box-sizing: border-box;
         }
+        
         .container {
-            width: 80%;
+            width: 100%;
             max-width: 600px;
             background-color: white;
             padding: 20px;
             box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
             border-radius: 8px;
             text-align: center;
+            box-sizing: border-box;
         }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+        }        
+        
         .button {
             margin-top: 20px;
             padding: 10px;
@@ -56,68 +72,70 @@
 </head>
 <body>
 
-<div class="container">
-    <div id="colorSelectionSection">
-        <h1>Word Recall Experiment</h1>
-        <form id="demographicsForm" onsubmit="submitForm(event)">
-            <label>Age: <input type="number" name="age" min="18" max="100" id="age" required></label><br><br>
-            <label>Gender: 
-                <select id="gender" required>
-                    <option value="" disabled selected>Select your gender</option>
-                    <option value="Female">Female</option>
-                    <option value="Male">Male</option>
-                    <option value="Non-binary">Non-binary</option>
-                    <option value="Prefer not to say">Prefer not to say</option>
-                </select>
-            </label><br><br>    
-            <label>Is English your first language?
-                <select id="firstLanguage" required>
-                    <option value="" disabled selected>Select an option</option>
-                    <option value="No">No</option>
-                    <option value="Yes">Yes</option>
-                </select>
-            </label><br><br>
-            <label>Have you been diagnosed with color blindness? 
-                <select id="colorBlind" required>
-                    <option value="" disabled selected>Select an option</option>
-                    <option value="No">No</option>
-                    <option value="Yes">Yes</option>
-                </select>
-            </label><br><br>
+<div class="wrapper">
+    <div class="container">
+        <div id="colorSelectionSection">
+            <h1>Word Recall Experiment</h1>
+            <form id="demographicsForm" onsubmit="submitForm(event)">
+                <label>Age: <input type="number" name="age" min="18" max="100" id="age" required></label><br><br>
+                <label>Gender: 
+                    <select id="gender" required>
+                        <option value="" disabled selected>Select your gender</option>
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                        <option value="Non-binary">Non-binary</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                </label><br><br>    
+                <label>Is English your first language?
+                    <select id="firstLanguage" required>
+                        <option value="" disabled selected>Select an option</option>
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </label><br><br>
+                <label>Have you been diagnosed with color blindness? 
+                    <select id="colorBlind" required>
+                        <option value="" disabled selected>Select an option</option>
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </label><br><br>
 
-            <h2>Purpose of Experiment</h2>
-            <p>Thank you for participating in this experiment. This study investigates how color preference affects word recall. Choose your preferred color for the experiment:</p>
-                <select id="color" required>
-                    <option value="" disabled selected>Select a color</option>
-                    <option value="black">Black</option>
-                    <option value="blue">Blue</option>
-                    <option value="red">Red</option>
-                    <option value="green">Green</option>
-                    <option value="purple">Purple</option>
-                    <option value="orange">Orange</option>
-                    <option value="pink">Pink</option>
-                </select>
-                <button type="submit" class="button">Start Experiment</button>
-        </form>
-    </div>
+                <h2>Purpose of Experiment</h2>
+                <p>Thank you for participating in this experiment. This study investigates how color preference affects word recall. Choose your preferred color for the experiment:</p>
+                    <select id="color" required>
+                        <option value="" disabled selected>Select a color</option>
+                        <option value="black">Black</option>
+                        <option value="blue">Blue</option>
+                        <option value="red">Red</option>
+                        <option value="green">Green</option>
+                        <option value="purple">Purple</option>
+                        <option value="orange">Orange</option>
+                        <option value="pink">Pink</option>
+                    </select>
+                    <button type="submit" class="button">Start Experiment</button>
+            </form>
+        </div>
 
-    <div id="wordDisplaySection" style="display: none;">
-        <h2>Memorize these words in 1 minute</h2>
-        <div class="word-grid" id="wordListContainer"></div>
-        <div class="timer" id="timer">60</div>
-    </div>
+        <div id="wordDisplaySection" style="display: none;">
+            <h2>Memorize these words in 1 minute</h2>
+            <div class="word-grid" id="wordListContainer"></div>
+            <div class="timer" id="timer">60</div>
+        </div>
 
-    <div id="wordSelectionSection" style="display: none;">
-        <h2>Select the Words You Remembered</h2>
-        <p>Select the 20 words you remember from the previous list.</p>
-        <div id="selectionForm" class="selection-grid"></div>
-        <!-- Bind checkAnswers and writeTestData to the submit button -->
-        <button type="button" class="button" onclick="checkAnswers(); window.writeTestData();">Submit Answers</button>
-    </div>
+        <div id="wordSelectionSection" style="display: none;">
+            <h2>Select the Words You Remembered</h2>
+            <p>Select the 20 words you remember from the previous list.</p>
+            <div id="selectionForm" class="selection-grid"></div>
+            <!-- Bind checkAnswers and writeTestData to the submit button -->
+            <button type="button" class="button" onclick="checkAnswers(); window.writeTestData();">Submit Answers</button>
+        </div>
 
-    <div id="resultsSection" style="display: none;">
-        <h2>Results</h2>
-        <p id="resultsText"></p>
+        <div id="resultsSection" style="display: none;">
+            <h2>Results</h2>
+            <p id="resultsText"></p>
+        </div>
     </div>
 </div>
 
