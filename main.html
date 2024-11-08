@@ -59,23 +59,52 @@
 <div class="container">
     <div id="colorSelectionSection">
         <h1>Word Recall Experiment</h1>
-        <p>Choose your preferred color for the experiment:</p>
-        <select id="color" required>
-            <option value="black">Black</option>
-            <option value="blue">Blue</option>
-            <option value="red">Red</option>
-            <option value="green">Green</option>
-            <option value="purple">Purple</option>
-            <option value="orange">Orange</option>
-            <option value="pink">Pink</option>
-        </select>
-        <button class="button" onclick="startExperiment()">Start Experiment</button>
+        <form id="demographicsForm" onsubmit="submitForm(event)">
+            <label>Age: <input type="number" name="age" min="18" max="100" id="age" required></label><br><br>
+            <label>Gender: 
+                <select id="gender" required>
+                    <option value="" disabled selected>Select your gender</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+            </label><br><br>    
+            <label>Is English your first language?
+                <select id="firstLanguage" required>
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </label><br><br>
+            <label>Have you been diagnosed with color blindness? 
+                <select id="colorBlind" required>
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </label><br><br>
+
+            <h2>Purpose of Experiment</h2>
+            <p>Thank you for participating in this experiment. This study investigates how color preference affects word recall. Choose your preferred color for the experiment:</p>
+                <select id="color" required>
+                    <option value="" disabled selected>Select a color</option>
+                    <option value="black">Black</option>
+                    <option value="blue">Blue</option>
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="purple">Purple</option>
+                    <option value="orange">Orange</option>
+                    <option value="pink">Pink</option>
+                </select>
+                <button type="submit" class="button">Start Experiment</button>
+        </form>
     </div>
 
     <div id="wordDisplaySection" style="display: none;">
-        <h2>Memorize these words</h2>
+        <h2>Memorize these words in 1 minute</h2>
         <div class="word-grid" id="wordListContainer"></div>
-        <div class="timer" id="timer">5</div>
+        <div class="timer" id="timer">60</div>
     </div>
 
     <div id="wordSelectionSection" style="display: none;">
@@ -99,24 +128,35 @@
     ];
 
     const additionalWords = [
-        "angle", "beach", "chair", "dream", "glove", "heart", "lemon", "mouse", "piano", "quick",
+        "angle", "beach", "chair", "dream", "glove", "heart", "never", "mouse", "piano", "quick",
         "table", "vivid", "zebra", "flock", "grape", "horse", "jelly", "knife", "liver", "march",
-        "night", "organ", "proud", "queen", "roast", "shade", "teeth", "uncle", "valve", "wheat",
+        "night", "organ", "proud", "virus", "roast", "shade", "teeth", "uncle", "valve", "wheat",
         "xenon", "yacht", "zonal", "bison", "clamp", "drift", "exile", "flint", "gleam", "hatch",
-        "ivory", "jolly", "kneel", "laser", "melon", "nerve", "ocean", "plumb", "quote", "raven",
+        "ivory", "jolly", "kneel", "laser", "melon", "nerve", "order", "plumb", "quote", "raven",
         "sheep", "toxic", "ultra", "vapor", "whale", "xerox", "youth", "zesty", "bloom", "crisp",
         "dough", "evoke", "feast", "glint", "honey", "islet", "judge", "kiosk", "lunar", "merit",
-        "noble", "olive", "pinky", "quest", "rebel", "silly", "torch", "ulcer", "vault", "widow"
+        "irony", "olive", "pinky", "quest", "rebel", "silly", "torch", "ulcer", "vault", "widow"
     ];
     
     let userColor = 'black';
     let colorCount = 0;
-    
+
+    let userData = {};
     function startExperiment() {
-        userColor = document.getElementById('color').value;
+        // Capture demographic information
+        userData.age = document.getElementById('age').value;
+        userData.gender = document.getElementById('gender').value;
+        userData.colorBlind = document.getElementById('colorBlind').value;
+        userData.userColor = document.getElementById('color').value;
         
         document.getElementById('colorSelectionSection').style.display = 'none';
         displayWordList();
+    }
+
+    
+    function submitForm(event) {
+        event.preventDefault();
+        startExperiment();
     }
 
     function displayWordList() {
@@ -126,13 +166,13 @@
         originalWords.forEach(word => {
             const wordElement = document.createElement('div');
             wordElement.innerText = word;
-            wordElement.style.color = userColor;
+            wordElement.style.color = userData.userColor;
             wordListContainer.appendChild(wordElement);
         });
         
         document.getElementById('wordDisplaySection').style.display = 'block';
         
-        let countdown = 5;
+        let countdown = 60;
         const timerElement = document.getElementById('timer');
         const countdownInterval = setInterval(() => {
             countdown--;
@@ -165,22 +205,28 @@
             selectionForm.appendChild(label);
         });
     }
-
     function checkAnswers() {
         const selectedWords = Array.from(document.querySelectorAll('#selectionForm input:checked')).map(input => input.value);
         let correctCount = 0;
+        let incorrectCount = 0;
+        
         selectedWords.forEach(word => {
             if (originalWords.includes(word)) {
                 correctCount++;
+            } else {
+                incorrectCount++;
             }
         });
-        colorCount = correctCount;
+    
+        userData.correctCount = correctCount;
+        userData.incorrectCount = incorrectCount;
         
         document.getElementById('wordSelectionSection').style.display = 'none';
         document.getElementById('resultsSection').style.display = 'block';
         
-        document.getElementById('resultsText').innerText = `You correctly recalled ${correctCount} out of 20 words.`;
+        document.getElementById('resultsText').innerText = `You correctly recalled ${correctCount} out of 20 words and selected ${incorrectCount} incorrect words.`;
     }
+    
 
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -208,12 +254,12 @@
     const database = getDatabase(app);
 
     // Define writeTestData function in the module and attach it to the window object
+
     window.writeTestData = function() {
         const dbRef = ref(database, 'testData');
         push(dbRef, {
             timestamp: new Date().toISOString(),
-            color: userColor,
-            memocnt: colorCount
+            userData: userData
         })
         .then(() => {
             console.log("Data written successfully");
