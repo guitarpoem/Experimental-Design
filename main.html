@@ -103,7 +103,10 @@
                 </label><br><br>
 
                 <h2>Purpose of Experiment</h2>
-                <p>Thank you for participating in this experiment. This study investigates how color preference affects word recall. Choose your preferred color for the experiment:</p>
+                <p>Thank you for participating in this experiment. This study investigates how color preference affects word recall.</p>
+
+                <div id="colorChoice">
+                    <p>Select your preferred color for the experiment:</p>
                     <select id="color" required>
                         <option value="" disabled selected>Select a color</option>
                         <option value="black">Black</option>
@@ -114,6 +117,7 @@
                         <option value="orange">Orange</option>
                         <option value="pink">Pink</option>
                     </select>
+                </div>
                     <button type="submit" class="button">Start Experiment</button>
             </form>
         </div>
@@ -158,6 +162,20 @@
     
     let userColor = 'black';
     let colorCount = 0;
+    let isTest = 0;
+
+    window.onload = function() {
+        const randomValue = Math.random();
+        if (randomValue < 0.3) { // 30% chance
+            userData.userColor = 'black';
+            document.getElementById('color').value = 'black';
+            document.getElementById("colorChoice").style.display = 'none'; // Hide color choice for 30%
+            document.getElementById("color").removeAttribute("required"); // Remove 'required' attribute
+        } else {
+            document.getElementById("colorChoice").style.display = 'block'; // Show color choice for 70%
+        }
+    };
+    
 
     let userData = {};
     function startExperiment() {
@@ -191,6 +209,9 @@
         document.getElementById('wordDisplaySection').style.display = 'block';
         
         let countdown = 60;
+        if (isTest) countdown = 3;
+        document.getElementById("timer").innerHTML = countdown;
+
         const timerElement = document.getElementById('timer');
         const countdownInterval = setInterval(() => {
             countdown--;
