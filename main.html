@@ -73,6 +73,11 @@
             grid-gap: 5px;
             margin-top: 20px;
         }
+        
+        .selected-word {
+            font-weight: bold;
+        }
+        
     </style>
 </head>
 <body>
@@ -144,14 +149,14 @@
         <div id="wordSelectionSection" style="display: none;">
             <h2>Select the Words You Remembered</h2>
             <p>Select the 20 words you remember from the previous list.</p>
+            <p id="selectedCount" style="font-weight: bold;">Selected: 0 / 20</p>
             <div id="selectionForm" class="selection-grid"></div>
-            <!-- Bind checkAnswers and writeTestData to the submit button -->
             <button type="button" class="button" onclick="checkAnswers(); window.writeTestData();">Submit Answers</button>
         </div>
 
         <div id="resultsSection" style="display: none;">
             <h2>Results</h2>
-            <p id="resultsText"></p>
+            <p id="resultsText" style="text-align: left;"></p>
         </div>
     </div>
 </div>
@@ -175,6 +180,7 @@
     
     let userColor = 'black';
     let colorCount = 0;
+    let selectedCount = 0;
     let isTest = 0;
 
     window.onload = function() {
@@ -236,47 +242,84 @@
         }, 1000);
     }
 
-    function proceedToSelection() {
+function proceedToSelection() {
         document.getElementById('wordDisplaySection').style.display = 'none';
         document.getElementById('wordSelectionSection').style.display = 'block';
-        
+
         const allWords = [...originalWords, ...additionalWords];
         shuffleArray(allWords);
 
         const selectionForm = document.getElementById('selectionForm');
         selectionForm.innerHTML = '';
+
         allWords.forEach(word => {
             const label = document.createElement('label');
             label.style.display = 'flex';
             label.style.alignItems = 'center';
+
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.value = word;
+
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    if (selectedCount < 20) {
+                        selectedCount++;
+                        label.classList.add('selected-word');
+                    } else {
+                        checkbox.checked = false;
+                    }
+                } else {
+                    selectedCount--;
+                    label.classList.remove('selected-word');
+                }
+                updateSelectedCount();
+            });
+
             label.appendChild(checkbox);
             label.appendChild(document.createTextNode(word));
             selectionForm.appendChild(label);
         });
     }
+
+    function updateSelectedCount() {
+        document.getElementById('selectedCount').textContent = `Selected: ${selectedCount} / 20`;
+        document.querySelectorAll('#selectionForm input[type="checkbox"]').forEach(checkbox => {
+            checkbox.disabled = selectedCount >= 20 && !checkbox.checked;
+        });
+    }
+
     function checkAnswers() {
+        // Get the list of selected words
         const selectedWords = Array.from(document.querySelectorAll('#selectionForm input:checked')).map(input => input.value);
-        let correctCount = 0;
-        let incorrectCount = 0;
         
+        // Separate selected words into correct and incorrect
+        const correctSelections = [];
+        const incorrectSelections = [];
+    
         selectedWords.forEach(word => {
             if (originalWords.includes(word)) {
-                correctCount++;
+                correctSelections.push(word);
             } else {
-                incorrectCount++;
+                incorrectSelections.push(word);
             }
         });
     
-        userData.correctCount = correctCount;
-        userData.incorrectCount = incorrectCount;
+        userData.correctSelections = correctSelections;
+        userData.incorrectSelections = incorrectSelections;
+        userData.correctCount = correctSelections.length;
+        userData.incorrectCount = incorrectSelections.length;
         
         document.getElementById('wordSelectionSection').style.display = 'none';
         document.getElementById('resultsSection').style.display = 'block';
         
-        document.getElementById('resultsText').innerText = `You correctly recalled ${correctCount} out of 20 words and selected ${incorrectCount} incorrect words.`;
+        document.getElementById('resultsText').innerText = `You correctly recalled ${userData.correctCount} out of 20 words and selected ${userData.incorrectCount} incorrect words.`;
+        // Display counts and lists of correct and incorrect words
+        document.getElementById('resultsText').innerHTML = `
+        <p>You correctly recalled ${userData.correctCount} out of 20 words and selected ${userData.incorrectCount} incorrect words.</p>
+        <p><strong>Correct Words:</strong> ${correctSelections.join(', ')}</p>
+        <p><strong>Incorrect Words:</strong> ${incorrectSelections.join(', ')}</p>
+    `;
     }
     
 
