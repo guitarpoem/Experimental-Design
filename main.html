@@ -33,6 +33,11 @@
             text-align: center;
             box-sizing: border-box;
         }
+
+        #colorSelectionSection {
+            text-align: left;
+        }
+
         
         @media (max-width: 600px) {
             .container {
@@ -101,12 +106,8 @@
                         <option value="Yes">Yes</option>
                     </select>
                 </label><br><br>
-
-                <h2>Purpose of Experiment</h2>
-                <p>Thank you for participating in this experiment. This study investigates how color preference affects word recall.</p>
-
                 <div id="colorChoice">
-                    <p>Select your preferred color for the experiment:</p>
+                    Select your preferred color for the experiment:
                     <select id="color" required>
                         <option value="" disabled selected>Select a color</option>
                         <option value="black">Black</option>
@@ -117,7 +118,19 @@
                         <option value="orange">Orange</option>
                         <option value="pink">Pink</option>
                     </select>
-                </div>
+                </div><br>
+
+                <h2>Purpose of Experiment</h2>
+                <p>Thank you for considering participation in this study. The purpose of this experiment is to investigate how color preference influences word recall ability. You will be shown a list of 20 words, each displayed either in your selected color or in black, for a period of one minute. Afterward, you will be asked to recall as many words as possible.</p>
+                <h2>Consent of Experiment</h2>
+                <p>Your participation is voluntary, and you may withdraw at any time. By proceeding, you consent to the collection of your recall performance data for research purposes only.</p>
+            
+                <!-- Consent Checkbox -->
+                <label>
+                    <input type="checkbox" id="consent" required>
+                    I consent to participate in this experiment and understand that my data will be used for research purposes.
+                </label><br><br>
+                
                     <button type="submit" class="button">Start Experiment</button>
             </form>
         </div>
