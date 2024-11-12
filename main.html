@@ -115,7 +115,6 @@
                     Select your preferred color for the experiment:
                     <select id="color" required>
                         <option value="" disabled selected>Select a color</option>
-                        <option value="black">Black</option>
                         <option value="blue">Blue</option>
                         <option value="red">Red</option>
                         <option value="green">Green</option>
@@ -185,7 +184,7 @@
 
     window.onload = function() {
         const randomValue = Math.random();
-        if (randomValue < 0.3) { // 30% chance
+        if (randomValue < 0.0) { // 30% chance
             userData.userColor = 'black';
             document.getElementById('color').value = 'black';
             document.getElementById("colorChoice").style.display = 'none'; // Hide color choice for 30%
